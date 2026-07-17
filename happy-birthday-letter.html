@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#2E0D16">
+<title>Happy Birthday</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,400;0,500;0,600;1,400;1,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Mrs+Saint+Delafield&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/SplitText.min.js"></script>
+<style>
+  :root {
+    --ink:#4A1520; --ink-deep:#2E0D16; --wine:#7A2439;
+    --parchment:#F4E8D0; --parchment-deep:#E6D2A8;
+    --seal:#9C2E42; --seal-deep:#741F30; --gold:#D4AF7A;
+    --ink-text:#34211A; --ivory-text:#F6E9D3; --blush-glow:#E3A9AE;
+    --glass-bg:rgba(255,255,255,0.06); --glass-border:rgba(255,255,255,0.14);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body { font-family:'EB Garamond', serif; line-height:1.6; -webkit-font-smoothing:antialiased; background:var(--ink-deep); }
+  ::selection { background:var(--gold); color:var(--ink); }
+  :focus-visible { outline:2px solid var(--gold); outline-offset:4px; }
+
+  /* ---------------- EDIT HERE ----------------
+     Personalize names/text through the file. See PHOTOS /
+     VIDEO / MUSIC comments further down for adding your media. */
+
+  .content-card { max-width:640px; width:100%; }
+  .ch-eyebrow { font-family:'Cormorant',serif; font-style:italic; letter-spacing:.22em; text-transform:uppercase; font-size:.78rem; margin-bottom:.75rem; opacity:.9; color:var(--gold); }
+  .panel.light .ch-eyebrow, .panel.light-deep .ch-eyebrow { color:var(--wine); }
+  .ch-heading { font-family:'Cormorant',serif; font-weight:500; font-style:italic; font-size:clamp(1.9rem,5vw,2.6rem); margin-bottom:1.5rem; }
+  .ch-sub { font-family:'Cormorant',serif; font-style:italic; font-size:clamp(1rem,2.2vw,1.2rem); opacity:.85; margin-bottom:1rem; }
+
+  @keyframes popIn { 0%{opacity:0;transform:scale(.7) translateY(18px);} 70%{opacity:1;transform:scale(1.05) translateY(-2px);} 100%{opacity:1;transform:scale(1) translateY(0);} }
+  @keyframes slideInLeft { from{opacity:0;transform:translateX(-70px) scale(.92);} to{opacity:1;transform:translateX(0) scale(1);} }
+  @keyframes slideInRight { from{opacity:0;transform:translateX(70px) scale(.92);} to{opacity:1;transform:translateX(0) scale(1);} }
+  @keyframes blurFocus { from{opacity:0;filter:blur(14px);transform:scale(1.1);} to{opacity:1;filter:blur(0);transform:scale(1);} }
+  @keyframes riseUp { from{opacity:0;transform:translateY(55px);} to{opacity:1;transform:translateY(0);} }
+  @keyframes tiltIn { from{opacity:0;transform:rotate(-14deg) scale(.85);} to{opacity:1;transform:rotate(0deg) scale(1);} }
+  .js-ready .pop-target { opacity:0; }
+  .pop-target.pop-in { opacity:1; animation-fill-mode:forwards; animation-duration:.7s; animation-timing-function:cubic-bezier(.34,1.4,.4,1); }
+  .pop-target.pop-in.anim-pop { animation-name:popIn; }
+  .pop-target.pop-in.anim-left { animation-name:slideInLeft; }
+  .pop-target.pop-in.anim-right { animation-name:slideInRight; }
+  .pop-target.pop-in.anim-blur { animation-name:blurFocus; }
+  .pop-target.pop-in.anim-rise { animation-name:riseUp; }
+  .pop-target.pop-in.anim-tilt { animation-name:tiltIn; }
+
+  /* decorative photo that appears on every chapter */
+  .chapter-photo { width:min(72vw,240px); aspect-ratio:4/5; border-radius:10px; overflow:hidden; margin:1.5rem auto 0; box-shadow:0 20px 40px -12px rgba(0,0,0,.4); background:var(--parchment-deep); }
+  .chapter-photo img { width:100%; height:100%; object-fit:cover; display:block; }
+  .chapter-photo.small { width:min(38vw,110px); margin:.6rem 0 0; }
+
+  /* ---------- CURSOR + MAGNETIC (desktop only) ---------- */
+  .cursor-dot, .cursor-ring { position:fixed; top:0; left:0; pointer-events:none; z-index:9999; border-radius:50%; transform:translate(-50%,-50%); display:none; }
+  .cursor-dot { width:6px; height:6px; background:var(--gold); }
+  .cursor-ring { width:34px; height:34px; border:1px solid var(--gold); opacity:.55; transition:width .3s ease,height .3s ease,opacity .3s ease,border-color .3s ease; }
+  .cursor-ring.hoverable { width:58px; height:58px; opacity:.95; border-color:var(--blush-glow); }
+  body.fine-pointer .cursor-dot, body.fine-pointer .cursor-ring { display:block; }
+  body.fine-pointer, body.fine-pointer a, body.fine-pointer button { cursor:none; }
+
+  /* ---------- GLOBAL AMBIENT PARTICLES ---------- */
+  #globalParticles { position:fixed; inset:0; overflow:hidden; pointer-events:none; z-index:1; mix-blend-mode:screen; }
+  .g-particle { position:absolute; bottom:-8%; border-radius:50%; background:radial-gradient(circle, var(--blush-glow), transparent 70%); animation-name:driftUp; animation-timing-function:linear; animation-iteration-count:infinite; }
+  @keyframes driftUp { 0%{transform:translateY(0) rotate(0deg);} 100%{transform:translateY(-120vh) rotate(180deg);} }
+
+  /* ---------- LOADING ---------- */
+  #loadingScreen { position:fixed; inset:0; z-index:5000; background:var(--ink-deep); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1.5rem; transition:opacity .8s ease, visibility .8s ease; }
+  #loadingScreen.hidden { opacity:0; visibility:hidden; pointer-events:none; }
+  .load-heart { width:22px; height:22px; background:var(--gold); transform:rotate(45deg); position:relative; animation:loadPulse 1.4s ease-in-out infinite; }
+  .load-heart::before, .load-heart::after { content:''; position:absolute; width:22px; height:22px; background:var(--gold); border-radius:50%; }
+  .load-heart::before { left:-11px; } .load-heart::after { top:-11px; }
+  @keyframes loadPulse { 0%,100%{transform:rotate(45deg) scale(1);} 50%{transform:rotate(45deg) scale(1.15);} }
+  .load-text { font-family:'Cormorant',serif; font-style:italic; letter-spacing:.15em; text-transform:uppercase; font-size:.8rem; color:var(--gold); opacity:.85; }
+  .load-bar { width:160px; height:1px; background:rgba(212,175,122,.25); overflow:hidden; }
+  .load-bar-fill { height:100%; width:0%; background:var(--gold); }
+
+  /* ---------- GATE ---------- */
+  #gateOverlay { position:fixed; inset:0; z-index:4000; }
+  .gate-page { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:3rem 1.5rem; background:radial-gradient(ellipse at 50% 40%, var(--wine) 0%, var(--ink) 62%, var(--ink-deep) 100%); color:var(--ivory-text); opacity:0; pointer-events:none; transition:opacity .5s ease; }
+  .gate-page.active { opacity:1; pointer-events:auto; }
+  .gate-eyebrow { font-family:'Cormorant',serif; font-style:italic; letter-spacing:.25em; text-transform:uppercase; font-size:.8rem; color:var(--gold); margin-bottom:1rem; opacity:.85; }
+  .gate-question { font-family:'Cormorant',serif; font-weight:500; font-size:clamp(2.2rem,7vw,3.4rem); margin-bottom:2.5rem; }
+  .gate-buttons { display:flex; gap:1.25rem; justify-content:center; }
+  .gate-btn { font-family:'Cormorant',serif; font-style:italic; font-size:1.1rem; padding:.75rem 2.25rem; border-radius:2px; cursor:pointer; transition:background .2s ease,opacity .2s ease; }
+  .gate-btn.yes { background:var(--gold); border:1px solid var(--gold); color:var(--ink-text); }
+  .gate-btn.no { background:transparent; border:1px solid var(--ivory-text); color:var(--ivory-text); opacity:.75; }
+  .gate-btn.no:hover { opacity:1; }
+  .no-heading { font-family:'Mrs Saint Delafield', cursive; font-size:clamp(2.6rem,7vw,3.6rem); color:var(--blush-glow); margin-bottom:1rem; }
+  .no-sub { font-family:'Cormorant',serif; font-style:italic; font-size:1.05rem; opacity:.85; margin-bottom:2.5rem; }
+  .pinned-bottom { position:absolute; bottom:2.5rem; left:50%; transform:translateX(-50%); }
+  .back-btn { font-family:'Cormorant',serif; font-style:italic; font-size:.95rem; background:none; border:1px solid var(--gold); color:var(--ivory-text); padding:.55rem 1.5rem; border-radius:2px; cursor:pointer; transition:background .2s ease,color .2s ease; }
+  .back-btn:hover { background:var(--gold); color:var(--ink-text); }
+
+  /* ---------- MAIN SITE: free continuous scroll ---------- */
+  #mainSite.hidden { display:none; }
+  .panel { min-height:100vh; width:100%; position:relative; display:flex; align-items:center; justify-content:center; text-align:center; padding:5rem 1.5rem; }
+  .panel.dark { background:radial-gradient(ellipse at 50% 40%, var(--wine) 0%, var(--ink) 62%, var(--ink-deep) 100%); color:var(--ivory-text); }
+  .panel.dark { background-image:radial-gradient(ellipse at 50% 40%, var(--wine) 0%, var(--ink) 62%, var(--ink-deep) 100%); background-size:160% 160%; animation:bgDrift 22s ease-in-out infinite; }
+  @keyframes bgDrift { 0%,100%{background-position:35% 25%;} 50%{background-position:65% 75%;} }
+  .panel.light { background:var(--parchment); color:var(--ink-text); }
+  .panel.light-deep { background:var(--parchment-deep); color:var(--ink-text); }
+  .text-shimmer { background:linear-gradient(90deg, currentColor 40%, var(--gold) 50%, currentColor 60%); background-size:250% auto; -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; animation:shimmerSweep 5s linear infinite; }
+  @keyframes shimmerSweep { 0%{background-position:200% center;} 100%{background-position:-200% center;} }
+  .chapter-photo { transform-style:preserve-3d; will-change:transform; }
+
+  .glass { background:var(--glass-bg); border:1px solid var(--glass-border); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); }
+
+  .floating-hearts-bg { position:absolute; inset:0; overflow:hidden; pointer-events:none; z-index:0; }
+  .floating-petal { position:absolute; bottom:-8%; color:var(--blush-glow); animation-name:driftUp; animation-timing-function:linear; animation-iteration-count:infinite; }
+  .hero-content { position:relative; z-index:1; }
+  .eyebrow { font-family:'Cormorant',serif; font-weight:500; font-size:.85rem; letter-spacing:.32em; text-transform:uppercase; color:var(--gold); margin-bottom:1.5rem; }
+  .for-line { font-family:'Cormorant',serif; font-style:italic; font-weight:400; font-size:clamp(1.3rem,3.5vw,1.7rem); color:var(--ivory-text); opacity:.92; margin-bottom:3.5rem; min-height:1.5em; }
+  .hero-title { font-family:'Cormorant',serif; font-weight:600; font-style:italic; font-size:clamp(3rem,12vw,6.5rem); color:var(--ivory-text); line-height:1; margin-bottom:1rem; }
+  .for-line { font-family:'Cormorant',serif; font-style:italic; font-weight:400; font-size:clamp(1.5rem,4vw,2.2rem); color:var(--gold); opacity:.95; margin-bottom:3rem; min-height:1.4em; }
+  .scroll-cue { margin-top:1rem; display:flex; flex-direction:column; align-items:center; gap:.6rem; font-family:'Cormorant',serif; font-style:italic; font-size:.8rem; letter-spacing:.25em; text-transform:uppercase; color:var(--gold); opacity:.75; }
+  .scroll-cue-line { width:1px; height:34px; background:var(--gold); animation:scrollCuePulse 1.8s ease-in-out infinite; }
+  @keyframes scrollCuePulse { 0%,100%{transform:scaleY(1);opacity:.5;} 50%{transform:scaleY(1.3);opacity:1;} }
+</style>
+</head>
+<body>
+
+  <div id="loadingScreen">
+    <div class="load-heart"></div>
+    <p class="load-text">loading your birthday</p>
+    <div class="load-bar"><div class="load-bar-fill" id="loadBarFill"></div></div>
+  </div>
+
+  <div class="cursor-dot" id="cursorDot"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+  <div id="globalParticles" aria-hidden="true"></div>
+
+  <div id="gateOverlay">
+    <section class="gate-page active" id="gate-yes-page">
+      <p class="gate-eyebrow">before we begin&hellip;</p>
+      <h1 class="gate-question">Do you love me? &#10084;</h1>
+      <div class="gate-buttons">
+        <button id="yesBtn" class="gate-btn yes magnetic" type="button">yes &#128150;</button>
+        <button id="noBtn" class="gate-btn no magnetic" type="button">no &#128557;</button>
+      </div>
+    </section>
+    <section class="gate-page" id="gate-no-page">
+      <p class="no-heading">Sudhar jaaaaa&hellip; &#128557;&#10084;</p>
+      <p class="no-sub">that wasn't the answer I was hoping for. try again?</p>
+      <button id="backBtn" class="back-btn pinned-bottom magnetic" type="button">&larr; back</button>
+    </section>
+  </div>
+
+  <div id="mainSite" class="hidden">
+
+    <section class="panel dark" id="ch-hero">
+      <div class="floating-hearts-bg" id="floatingHearts" aria-hidden="true"></div>
+      <div class="hero-content">
+        <p class="eyebrow">your day &bull; july 18th</p>
+        <h1 class="hero-title text-shimmer split-target">Happy Birthday</h1>
+        <p class="for-line pop-target" id="forLineText">Jaan</p>
+        <div class="scroll-cue pop-target" aria-hidden="true"><span>scroll</span><div class="scroll-cue-line"></div></div>
+      </div>
+    </section>
+
+    <style>
+      .timeline { display:flex; flex-direction:column; gap:1.75rem; text-align:left; margin-top:.5rem; }
+      .timeline-item { display:flex; gap:1rem; align-items:flex-start; }
+      .timeline-dot { width:9px; height:9px; border-radius:50%; background:var(--wine); margin-top:.5rem; flex-shrink:0; }
+      .timeline-text { font-size:clamp(.95rem,2vw,1.05rem); line-height:1.6; }
+      .timeline-text strong { font-family:'Cormorant',serif; font-style:italic; font-weight:600; color:var(--wine); font-size:1.05em; display:block; margin-bottom:.2rem; }
+    </style>
+
+    <section class="panel light" id="ch-welcome">
+      <div class="content-card">
+        <p class="ch-eyebrow">welcome, my love</p>
+        <h2 class="ch-heading split-target">you found it</h2>
+        <p class="ch-sub" style="max-width:520px;margin:0 auto;">A little corner of the internet that exists for exactly one reason &mdash; you. Happy birthday. Scroll gently, this one's personal.</p>
+        <div class="chapter-photo pop-target anim-rise" data-photo-index="0"></div>
+      </div>
+    </section>
+
+    <section class="panel dark" id="ch-story">
+      <div class="floating-hearts-bg parallax-layer" data-parallax aria-hidden="true"></div>
+      <div class="content-card" style="position:relative;z-index:1;">
+        <p class="ch-eyebrow">how it all began</p>
+        <h2 class="ch-heading split-target">our story</h2>
+        <p class="ch-sub" style="max-width:540px;margin:0 auto;">Every love story is different, and ours is my favorite one ever written. Quiet, a little silly, entirely ours.</p>
+        <div class="chapter-photo pop-target anim-blur" data-photo-index="1"></div>
+      </div>
+    </section>
+
+    <section class="panel light" id="ch-timeline">
+      <div class="content-card">
+        <p class="ch-eyebrow">a few dates worth remembering</p>
+        <h2 class="ch-heading split-target">memory timeline</h2>
+        <div class="timeline">
+          <div class="timeline-item pop-target">
+            <span class="timeline-dot" aria-hidden="true"></span>
+            <div class="timeline-text">
+              <strong>the day we met &mdash; 21 march 2025</strong>
+              Yaad hai jb mene pehli baar msg kara tha or tareef krne pr aapne kitna daanta tha &#128514;
+              <div class="chapter-photo small pop-target anim-left" data-photo-index="2"></div>
+            </div>
+          </div>
+          <div class="timeline-item pop-target">
+            <span class="timeline-dot" aria-hidden="true"></span>
+            <div class="timeline-text">
+              <strong>the day I knew</strong>
+              Or wo din yaad hai jb mujhe pata chala tha ki hamara rishta huawa hai &#128514; I was literally so excited that day &#128518;
+              <div class="chapter-photo small pop-target anim-right" data-photo-index="3"></div>
+            </div>
+          </div>
+          <div class="timeline-item pop-target">
+            <span class="timeline-dot" aria-hidden="true"></span>
+            <div class="timeline-text">
+              <strong>the proposal &mdash; 21st march</strong>
+              Jb mene kaha tha "aap achchi lgti ho" &#128518;
+              <div class="chapter-photo small pop-target anim-tilt" data-photo-index="4"></div>
+            </div>
+          </div>
+          <div class="timeline-item pop-target">
+            <span class="timeline-dot" aria-hidden="true"></span>
+            <div class="timeline-text"><strong>today</strong>still choosing you, every single day</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <style>
+      .gallery { display:flex; flex-wrap:wrap; justify-content:center; gap:1.5rem 1.1rem; }
+      .polaroid { background:#FBF6EA; padding:12px 12px 16px; width:clamp(110px,24vw,156px); box-shadow:0 12px 22px -8px rgba(46,13,22,.35),0 2px 5px rgba(46,13,22,.18); transform:rotate(var(--rot,0deg)); transition:transform .35s ease,box-shadow .35s ease; cursor:pointer; }
+      .polaroid:hover, .polaroid:focus-visible { transform:rotate(0deg) scale(1.07); box-shadow:0 18px 30px -8px rgba(46,13,22,.4); z-index:5; }
+      .photo-window { position:relative; aspect-ratio:1/1; overflow:hidden; background:var(--parchment-deep); }
+      .photo-window img { width:100%; height:100%; object-fit:cover; display:block; }
+      .gallery-empty-note { display:none; font-family:'Cormorant',serif; font-style:italic; font-size:.95rem; color:var(--wine); opacity:.75; margin-top:.5rem; }
+      .memories-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); gap:.5rem; }
+      .memory-thumb { position:relative; aspect-ratio:1/1; overflow:hidden; cursor:pointer; background:var(--parchment); }
+      .memory-thumb img { width:100%; height:100%; object-fit:cover; display:block; transition:transform .4s ease; }
+      .memory-thumb:hover img, .memory-thumb:focus-visible img { transform:scale(1.08); }
+      .lightbox { position:fixed; inset:0; background:rgba(20,6,10,.94); display:none; align-items:center; justify-content:center; z-index:6000; padding:2rem; }
+      .lightbox.active { display:flex; }
+      .lightbox-img { max-width:88vw; max-height:82vh; object-fit:contain; box-shadow:0 20px 60px rgba(0,0,0,.5); }
+      .lightbox-close, .lightbox-prev, .lightbox-next { position:absolute; background:none; border:none; color:var(--ivory-text); cursor:pointer; opacity:.8; transition:opacity .2s ease; }
+      .lightbox-close:hover, .lightbox-prev:hover, .lightbox-next:hover { opacity:1; }
+      .lightbox-close { top:1rem; right:1.5rem; font-size:2.2rem; }
+      .lightbox-prev, .lightbox-next { top:50%; transform:translateY(-50%); font-size:3rem; padding:.5rem 1rem; }
+      .lightbox-prev { left:.5rem; } .lightbox-next { right:.5rem; }
+      .simple-list { list-style:none; display:flex; flex-direction:column; gap:1.1rem; text-align:left; }
+      .simple-list li { font-size:clamp(1rem,2vw,1.15rem); line-height:1.7; padding-left:1.6rem; position:relative; }
+      .simple-list li::before { content:'\2665'; position:absolute; left:0; top:.15em; color:var(--gold); font-size:.85rem; }
+      .letter-salutation { font-family:'Cormorant',serif; font-style:italic; font-weight:500; font-size:clamp(1.7rem,4vw,2.1rem); color:var(--wine); margin-bottom:1.75rem; text-align:left; }
+      .letter-line { font-size:clamp(1.02rem,2vw,1.15rem); line-height:1.85; margin-bottom:1.3rem; text-align:left; }
+      .letter-signature { font-family:'Mrs Saint Delafield', cursive; font-size:clamp(2.2rem,6vw,2.8rem); color:var(--wine); margin-top:1.5rem; text-align:right; }
+      .divider { display:flex; align-items:center; gap:.85rem; color:var(--gold); font-size:.85rem; max-width:220px; margin:0 auto; }
+      .divider::before, .divider::after { content:''; flex:1; height:1px; background:var(--gold); opacity:.55; }
+    </style>
+
+    <!-- ---------------- PHOTOS ----------------
+         Create a folder named "assets" next to this file, then
+         add photo-1.jpg, photo-2.jpg, photo-3.jpg, etc (.jpeg /
+         .png also fine), any number up to 100. The first 6 show
+         as curated favorites, the rest fill the full album, and
+         the same set is reused as the small accent photo on
+         every other chapter -- no other file needs to change. -->
+    <section class="panel light" id="ch-gallery">
+      <div class="content-card">
+        <p class="ch-eyebrow">a few favorite moments</p>
+        <h2 class="ch-heading split-target">a few of my favorites</h2>
+        <div class="gallery" id="curatedGallery"></div>
+        <p class="gallery-empty-note" id="galleryEmptyNote">your photos will appear here once you add them to /assets</p>
+      </div>
+    </section>
+
+    <section class="panel light-deep" id="ch-album">
+      <div class="content-card" style="max-width:960px;">
+        <p class="ch-eyebrow">all of us</p>
+        <h2 class="ch-heading split-target">the full album</h2>
+        <div class="memories-grid" id="memoriesGrid"></div>
+      </div>
+    </section>
+
+    <section class="panel dark" id="ch-reasons">
+      <div class="content-card">
+        <p class="ch-eyebrow">just a few, out of hundreds</p>
+        <h2 class="ch-heading split-target">reasons I love you</h2>
+        <ul class="simple-list">
+          <li class="pop-target">the way you laugh at your own jokes before you even finish telling them</li>
+          <li class="pop-target">how you remember the smallest things I mention in passing</li>
+          <li class="pop-target">the way you make any place feel like home</li>
+          <li class="pop-target">how excited you still get about things you've seen a hundred times</li>
+          <li class="pop-target">simply, you</li>
+        </ul>
+        <div class="chapter-photo pop-target anim-pop" data-photo-index="5"></div>
+      </div>
+    </section>
+
+    <section class="panel light-deep" id="ch-littlethings">
+      <div class="content-card">
+        <p class="ch-eyebrow">the little things</p>
+        <h2 class="ch-heading split-target">things I notice about you</h2>
+        <ul class="simple-list">
+          <li class="pop-target">the way your nose scrunches when you laugh too hard</li>
+          <li class="pop-target">how you always steal the blanket at night</li>
+          <li class="pop-target">that specific face you make when you're pretending not to be excited</li>
+          <li class="pop-target">how you hum without even realizing it</li>
+        </ul>
+        <div class="chapter-photo pop-target anim-right" data-photo-index="14"></div>
+      </div>
+    </section>
+
+    <section class="panel light" id="ch-letter">
+      <div class="content-card">
+        <p class="ch-eyebrow">something I wrote for you</p>
+        <h2 class="ch-heading split-target">a love letter</h2>
+        <p class="letter-salutation">Meri Jaan,</p>
+        <p class="letter-line pop-target">Another year has passed, and somehow you've become even more remarkable than you were the day before. Today isn't only about the day you were born &mdash; it's about celebrating everything you've grown into, and everything you mean to me.</p>
+        <p class="letter-line pop-target">I think about how lucky I am more often than you probably know. Lucky to wake up knowing you're mine. Lucky to have found someone who turns ordinary days into small adventures, and makes the hard ones lighter just by being in them.</p>
+        <p class="letter-line pop-target">So today, of all days, I hope you feel as cherished as you make me feel. Happy birthday, my love. Here's to another year of us.</p>
+        <p class="letter-signature">Always yours</p>
+        <div class="chapter-photo pop-target anim-left" data-photo-index="6"></div>
+      </div>
+    </section>
+
+    <style>
+      .nickname-cloud { display:flex; flex-wrap:wrap; gap:.7rem; justify-content:center; }
+      .nickname-tag { font-family:'Cormorant',serif; font-style:italic; font-size:1.05rem; padding:.55rem 1.1rem; border:1px solid var(--gold); border-radius:999px; color:var(--ivory-text); background:rgba(212,175,122,.08); cursor:pointer; }
+    </style>
+
+    <section class="panel light-deep" id="ch-future">
+      <div class="content-card">
+        <p class="ch-eyebrow">looking ahead</p>
+        <h2 class="ch-heading split-target">dreaming about our future</h2>
+        <ul class="simple-list">
+          <li class="pop-target">waking up next to you, every day, for the rest of our lives</li>
+          <li class="pop-target">building a home that's really, truly ours</li>
+          <li class="pop-target">all the trips we keep talking about and haven't taken yet</li>
+          <li class="pop-target">growing old with you, still laughing at your jokes</li>
+        </ul>
+        <div class="chapter-photo pop-target anim-right" data-photo-index="7"></div>
+      </div>
+    </section>
+
+    <section class="panel dark" id="ch-nicknames">
+      <div class="floating-hearts-bg parallax-layer" data-parallax aria-hidden="true"></div>
+      <div class="content-card" style="position:relative;z-index:1;">
+        <p class="ch-eyebrow">a few names I call you</p>
+        <h2 class="ch-heading split-target">and I mean every one</h2>
+        <div class="nickname-cloud" id="nicknameCloud"></div>
+        <div class="chapter-photo pop-target anim-blur" data-photo-index="8"></div>
+      </div>
+    </section>
+
+    <section class="panel light" id="ch-promises">
+      <div class="content-card">
+        <p class="ch-eyebrow">promises for this year</p>
+        <h2 class="ch-heading split-target">what I promise you</h2>
+        <ul class="simple-list">
+          <li class="pop-target">to make you laugh even on your hardest days</li>
+          <li class="pop-target">to never let a compliment go unsaid again, daant lena chahe jitna &#128514;</li>
+          <li class="pop-target">to celebrate you not just today, but every single day this year</li>
+          <li class="pop-target">to keep choosing you, again and again</li>
+        </ul>
+        <div class="chapter-photo pop-target anim-tilt" data-photo-index="9"></div>
+      </div>
+    </section>
+
+    <style>
+      .stats-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:1.75rem 1rem; margin-top:1rem; }
+      .stat-item { display:flex; flex-direction:column; align-items:center; gap:.3rem; }
+      .stat-num { font-family:'Cormorant',serif; font-weight:600; font-size:clamp(2rem,7vw,3rem); color:var(--gold); line-height:1; }
+      .stat-label { font-family:'Cormorant',serif; font-style:italic; font-size:.82rem; opacity:.85; text-align:center; }
+    </style>
+    <section class="panel dark" id="ch-stats">
+      <div class="content-card">
+        <p class="ch-eyebrow">just for fun</p>
+        <h2 class="ch-heading split-target">birthday stats</h2>
+        <div class="stats-grid">
+          <div class="stat-item pop-target anim-pop"><span class="stat-num">&#8734;</span><span class="stat-label">reasons to love you</span></div>
+          <div class="stat-item pop-target anim-left"><span class="stat-num" id="statChai">0</span><span class="stat-label">cups of chai shared</span></div>
+          <div class="stat-item pop-target anim-right"><span class="stat-num">100%</span><span class="stat-label">arguments you've won</span></div>
+          <div class="stat-item pop-target anim-rise"><span class="stat-num">24/7</span><span class="stat-label">on my mind</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel dark" id="ch-wishes">
+      <div class="content-card">
+        <p class="ch-eyebrow">on your day</p>
+        <h2 class="ch-heading split-target">a few wishes for you</h2>
+        <ul class="simple-list">
+          <li class="pop-target">may this year bring you every bit of joy you give to everyone around you</li>
+          <li class="pop-target">may you laugh often, rest well, and worry less</li>
+          <li class="pop-target">may we keep choosing new adventures together</li>
+          <li class="pop-target">and may you always know how loved you are</li>
+        </ul>
+        <div class="chapter-photo pop-target anim-rise" data-photo-index="10"></div>
+      </div>
+    </section>
+
+    <section class="panel light-deep" id="ch-morewishes">
+      <div class="content-card">
+        <p class="ch-eyebrow">and a little more</p>
+        <h2 class="ch-heading split-target">more wishes, just for you</h2>
+        <ul class="simple-list">
+          <li class="pop-target">health that never wavers</li>
+          <li class="pop-target">dreams that keep growing bigger</li>
+          <li class="pop-target">a year as sweet as meri ras malai herself</li>
+          <li class="pop-target">endless reasons to smile</li>
+        </ul>
+        <div class="chapter-photo pop-target anim-pop" data-photo-index="11"></div>
+      </div>
+    </section>
+
+    <style>
+      #confettiCanvas { position:fixed; inset:0; z-index:5500; pointer-events:none; }
+      .surprise-number { font-family:'Cormorant',serif; font-weight:600; font-size:clamp(3.5rem,14vw,7rem); color:var(--gold); line-height:1; margin:.5rem 0; }
+      .video-frame { width:100%; max-width:420px; aspect-ratio:9/16; margin:0 auto; background:var(--ink); border-radius:10px; overflow:hidden; position:relative; box-shadow:0 25px 55px -15px rgba(0,0,0,.5); border:1px solid var(--glass-border); }
+      .video-frame video { width:100%; height:100%; object-fit:cover; display:block; }
+      .video-placeholder { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.6rem; background:repeating-linear-gradient(45deg, var(--ink) 0 10px, var(--ink-deep) 10px 20px); }
+      .video-placeholder-icon { font-size:2rem; color:var(--gold); }
+      .video-placeholder-text { font-family:'Cormorant',serif; font-style:italic; font-size:.85rem; color:var(--ivory-text); opacity:.75; }
+    </style>
+
+    <section class="panel dark" id="ch-surprise">
+      <div class="floating-hearts-bg parallax-layer" data-parallax aria-hidden="true"></div>
+      <canvas id="confettiCanvas" aria-hidden="true"></canvas>
+      <div class="content-card" style="position:relative;z-index:1;">
+        <p class="ch-eyebrow">one more thing&hellip;</p>
+        <h2 class="ch-heading split-target">we've been writing our story for</h2>
+        <p class="surprise-number pop-target" id="daysTogether">&mdash;</p>
+        <p class="ch-sub">days, and counting. Here's to thousands more.</p>
+        <div class="chapter-photo pop-target anim-left" data-photo-index="12"></div>
+      </div>
+    </section>
+
+    <!-- ---------------- VIDEO ----------------
+         Save one video as assets/our-video.mp4. Until then this
+         shows a soft placeholder. -->
+    <section class="panel light" id="ch-video">
+      <div class="content-card">
+        <p class="ch-eyebrow">a memory, in motion</p>
+        <h2 class="ch-heading split-target">video memory</h2>
+        <div class="video-frame pop-target">
+          <video id="memoryVideo" src="assets/our-video.mp4" playsinline muted loop preload="metadata"></video>
+          <div class="video-placeholder" id="videoPlaceholder">
+            <span class="video-placeholder-icon">&#9679;</span>
+            <span class="video-placeholder-text">assets/our-video.mp4</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel dark" id="ch-ending">
+      <div class="content-card">
+        <div class="divider" aria-hidden="true">&#9825;</div>
+        <p class="letter-signature split-target" style="text-align:center;font-size:clamp(2.5rem,7vw,3.5rem);color:var(--gold);margin-top:2rem;">happy birthday, Jaan</p>
+        <p class="ch-sub">today, and always</p>
+        <div class="chapter-photo pop-target anim-blur" data-photo-index="13"></div>
+      </div>
+    </section>
+
+    <section class="panel light" id="ch-ps">
+      <div class="content-card">
+        <p class="ch-eyebrow">p.s.</p>
+        <h2 class="ch-heading split-target">one more thing</h2>
+        <p class="ch-sub" style="max-width:480px;margin:0 auto;">if you scroll back up and do this all over again, I really won't mind. Endlessly yours, Jaan.</p>
+        <div class="chapter-photo pop-target anim-pop" data-photo-index="15"></div>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="page-nav glass" id="pageNav">
+    <div class="nav-dots" id="navDots"></div>
+  </div>
+
+  <!-- ---------------- MUSIC ----------------
+       Save one song as assets/song.mp3 -- the button appears
+       automatically once it's found. -->
+  <button class="music-btn glass magnetic" id="musicBtn" type="button" aria-label="Play music" style="display:none;">&#9835;</button>
+  <audio id="bgMusic" src="assets/song.mp3" loop preload="none"></audio>
+
+  <div class="lightbox" id="lightbox" aria-hidden="true">
+    <button class="lightbox-close" id="lightboxClose" aria-label="Close">&times;</button>
+    <button class="lightbox-prev" id="lightboxPrev" aria-label="Previous photo">&#8249;</button>
+    <img class="lightbox-img" id="lightboxImg" src="" alt="A favorite memory together">
+    <button class="lightbox-next" id="lightboxNext" aria-label="Next photo">&#8250;</button>
+  </div>
+
+  <style>
+    .page-nav { position:fixed; right:1.1rem; top:50%; transform:translateY(-50%); display:none; flex-direction:column; align-items:center; gap:.85rem; z-index:3000; padding:.7rem .5rem; border-radius:999px; }
+    .nav-dots { display:flex; flex-direction:column; gap:.5rem; }
+    .nav-dot { width:7px; height:7px; border-radius:50%; background:var(--gold); opacity:.35; border:none; cursor:pointer; padding:0; }
+    .nav-dot.active { opacity:1; transform:scale(1.3); }
+    .music-btn { position:fixed; left:1.1rem; bottom:1.1rem; z-index:3000; width:44px; height:44px; border-radius:50%; color:var(--gold); font-size:1.1rem; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+    .music-btn.playing { animation:musicPulse 2s ease-in-out infinite; }
+    @keyframes musicPulse { 0%,100%{box-shadow:0 0 0 0 rgba(212,175,122,.35);} 50%{box-shadow:0 0 0 8px rgba(212,175,122,0);} }
+    @media (max-width:480px) {
+      .lightbox-prev, .lightbox-next { font-size:2.2rem; padding:.5rem .6rem; }
+      .page-nav { right:.5rem; gap:.5rem; padding:.6rem .4rem; }
+      .panel { padding:4rem 1.25rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; scroll-behavior:auto !important; }
+    }
+  </style>
+
+<script>
+  document.body.classList.add('js-ready');
+  gsap.registerPlugin(ScrollTrigger, SplitText);
+
+  /* ---------------- EDIT HERE ----------------
+     Met date powers the "days together" counter. */
+  const RELATIONSHIP_START = '2025-03-21';
+  const MAX_PHOTOS = 100;
+  const PHOTO_EXTS = ['jpg', 'jpeg', 'png'];
+  const NICKNAMES = ['Jaan \u2764\ufe0f','Madam jii \ud83e\udee0','Malkin \ud83e\udee1','Meri ras malai \ud83d\ude0b','Meri chammak challo \ud83d\ude06','Mera baby \ud83d\ude1a','Mera bachcha chota sa \ud83d\ude06','Meri cutieee \ud83d\ude0a','Mera chaand \ud83d\ude1a','Mera khubsurti ka khazana \ud83d\ude1a','Meri sundariiiii \ud83d\ude0d','Mera ras gulla \ud83d\ude1a','Meri aesthetic chhoriiiiii \ud83d\ude1a','Meri Shizuka \ud83e\udec2'];
+
+  /* ---------- LOADING ---------- */
+  const loadingScreen = document.getElementById('loadingScreen');
+  gsap.to('#loadBarFill', { width: '100%', duration: 1.6, ease: 'power1.inOut' });
+  window.addEventListener('load', () => setTimeout(() => loadingScreen.classList.add('hidden'), 900));
+  setTimeout(() => loadingScreen.classList.add('hidden'), 3200);
+
+  /* ---------- CURSOR ---------- */
+  const cursorDot = document.getElementById('cursorDot');
+  const cursorRing = document.getElementById('cursorRing');
+  if (window.matchMedia('(pointer: fine)').matches) {
+    document.body.classList.add('fine-pointer');
+    let mouseX = innerWidth / 2, mouseY = innerHeight / 2, ringX = mouseX, ringY = mouseY;
+    window.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX; mouseY = e.clientY;
+      cursorDot.style.left = mouseX + 'px'; cursorDot.style.top = mouseY + 'px';
+    });
+    gsap.ticker.add(() => {
+      ringX += (mouseX - ringX) * 0.18; ringY += (mouseY - ringY) * 0.18;
+      cursorRing.style.left = ringX + 'px'; cursorRing.style.top = ringY + 'px';
+    });
+    document.addEventListener('mouseover', (e) => { if (e.target.closest('a, button, .polaroid, .memory-thumb, .magnetic')) cursorRing.classList.add('hoverable'); });
+    document.addEventListener('mouseout', (e) => { if (e.target.closest('a, button, .polaroid, .memory-thumb, .magnetic')) cursorRing.classList.remove('hoverable'); });
+  }
+
+  /* ---------- MAGNETIC BUTTONS ---------- */
+  document.querySelectorAll('.magnetic').forEach((btn) => {
+    btn.addEventListener('mousemove', (e) => {
+      const r = btn.getBoundingClientRect();
+      gsap.to(btn, { x: (e.clientX - r.left - r.width / 2) * 0.35, y: (e.clientY - r.top - r.height / 2) * 0.35, duration: 0.4, ease: 'power3.out' });
+    });
+    btn.addEventListener('mouseleave', () => gsap.to(btn, { x: 0, y: 0, duration: 0.5, ease: 'elastic.out(1,0.4)' }));
+  });
+
+  /* ---------- 3D TILT for chapter photos (fine pointer only) ---------- */
+  if (window.matchMedia('(pointer: fine)').matches) {
+    document.addEventListener('mousemove', (e) => {
+      const el = e.target.closest('.chapter-photo');
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width - 0.5;
+      const py = (e.clientY - r.top) / r.height - 0.5;
+      gsap.to(el, { rotateY: px * 16, rotateX: -py * 16, duration: 0.4, ease: 'power2.out' });
+    });
+    document.addEventListener('mouseout', (e) => {
+      if (e.target.closest('.chapter-photo')) gsap.to(e.target.closest('.chapter-photo'), { rotateY: 0, rotateX: 0, duration: 0.6, ease: 'elastic.out(1,0.5)' });
+    });
+  }
+
+  /* ---------- SPARKLE BURST ---------- */
+  function sparkleAt(x, y) {
+    for (let i = 0; i < 8; i++) {
+      const s = document.createElement('span');
+      s.textContent = '\u2726';
+      s.style.cssText = `position:fixed;left:${x}px;top:${y}px;color:var(--gold);font-size:${8 + Math.random() * 8}px;pointer-events:none;z-index:9998;`;
+      document.body.appendChild(s);
+      const angle = Math.random() * Math.PI * 2, dist = 30 + Math.random() * 40;
+      gsap.to(s, { x: Math.cos(angle) * dist, y: Math.sin(angle) * dist, opacity: 0, duration: 0.7, ease: 'power2.out', onComplete: () => s.remove() });
+    }
+  }
+
+  /* ---------- AMBIENT PARTICLES ---------- */
+  const globalParticlesEl = document.getElementById('globalParticles');
+  for (let i = 0; i < 25; i++) {
+    const p = document.createElement('span'); p.className = 'g-particle';
+    const size = 3 + Math.random() * 5;
+    p.style.width = size + 'px'; p.style.height = size + 'px';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.opacity = (0.2 + Math.random() * 0.3).toFixed(2);
+    p.style.animationDuration = (18 + Math.random() * 18) + 's';
+    p.style.animationDelay = (Math.random() * 20) + 's';
+    globalParticlesEl.appendChild(p);
+  }
+  const heartsContainer = document.getElementById('floatingHearts');
+  const petalSymbols = ['\u2665', '\u2766'];
+  for (let i = 0; i < 14; i++) {
+    const el = document.createElement('span'); el.className = 'floating-petal';
+    el.textContent = petalSymbols[Math.floor(Math.random() * petalSymbols.length)];
+    el.style.left = Math.random() * 100 + '%';
+    el.style.fontSize = (10 + Math.random() * 14) + 'px';
+    el.style.opacity = (0.15 + Math.random() * 0.25).toFixed(2);
+    el.style.animationDuration = (16 + Math.random() * 14) + 's';
+    el.style.animationDelay = (Math.random() * 14) + 's';
+    heartsContainer.appendChild(el);
+  }
+
+  /* ---------- NICKNAME CYCLE (hero) ---------- */
+  const forLineEl = document.getElementById('forLineText');
+  let nickIdx = 0;
+  setInterval(() => {
+    gsap.to(forLineEl, { opacity: 0, y: -8, duration: 0.4, onComplete: () => {
+      nickIdx = (nickIdx + 1) % NICKNAMES.length;
+      forLineEl.textContent = NICKNAMES[nickIdx];
+      gsap.to(forLineEl, { opacity: 1, y: 0, duration: 0.4 });
+    }});
+  }, 2600);
+
+  /* ---------- CHAPTER TRACKING (dots only, free scroll) ---------- */
+  const CHAPTER_IDS = ['ch-hero','ch-welcome','ch-story','ch-timeline','ch-gallery','ch-album','ch-reasons','ch-littlethings','ch-letter','ch-future','ch-nicknames','ch-promises','ch-stats','ch-wishes','ch-morewishes','ch-surprise','ch-video','ch-ending','ch-ps'];
+  const pageNav = document.getElementById('pageNav');
+  const navDots = document.getElementById('navDots');
+  const mainSite = document.getElementById('mainSite');
+
+  CHAPTER_IDS.forEach((id) => {
+    const dot = document.createElement('button');
+    dot.type = 'button'; dot.className = 'nav-dot'; dot.dataset.target = id;
+    dot.setAttribute('aria-label', 'Go to ' + id.replace('ch-', ''));
+    dot.addEventListener('click', () => document.getElementById(id).scrollIntoView({ behavior: 'smooth' }));
+    navDots.appendChild(dot);
+  });
+  function setActiveChapter(id) { navDots.querySelectorAll('.nav-dot').forEach((d) => d.classList.toggle('active', d.dataset.target === id)); }
+  function popInPanel(panel) {
+    if (!panel) return;
+    panel.querySelectorAll('.pop-target').forEach((el, i) => {
+      el.classList.remove('pop-in'); void el.offsetWidth;
+      el.style.animationDelay = Math.min(i * 0.08, 1.2) + 's';
+      el.classList.add('pop-in');
+    });
+  }
+  function splitReveal(panel) {
+    const heading = panel.querySelector('.split-target');
+    if (!heading || heading.dataset.split) return;
+    heading.dataset.split = '1';
+    const isHero = panel.id === 'ch-hero';
+    try {
+      const split = new SplitText(heading, { type: isHero ? 'chars' : 'words' });
+      const targets = isHero ? split.chars : split.words;
+      gsap.from(targets, { opacity: 0, y: isHero ? 44 : 26, rotateX: isHero ? -100 : -35, scale: isHero ? 0.4 : 1, transformOrigin: '50% 100%', duration: isHero ? 0.9 : 0.7, stagger: isHero ? 0.035 : 0.06, ease: 'back.out(1.6)' });
+    } catch (err) { heading.style.opacity = 1; }
+  }
+
+  const chapterObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting && entry.intersectionRatio > 0.4) {
+        setActiveChapter(entry.target.id);
+        popInPanel(entry.target);
+        splitReveal(entry.target);
+        if (entry.target.id === 'ch-surprise') triggerSurprise();
+        if (entry.target.id === 'ch-stats') triggerStats();
+        if (entry.target.id === 'ch-video') memoryVideo.play().catch(() => {}); else memoryVideo.pause();
+      }
+    });
+  }, { threshold: [0.4] });
+  document.querySelectorAll('.panel').forEach((p) => chapterObserver.observe(p));
+
+  /* ---------- PARALLAX ---------- */
+  gsap.utils.toArray('[data-parallax]').forEach((layer) => {
+    gsap.to(layer, { yPercent: -22, ease: 'none', scrollTrigger: { trigger: layer.closest('.panel'), scrub: true } });
+  });
+
+  /* ---------- GATE ---------- */
+  document.getElementById('yesBtn').addEventListener('click', () => {
+    document.getElementById('gate-yes-page').classList.remove('active');
+    document.getElementById('gateOverlay').style.display = 'none';
+    mainSite.classList.remove('hidden');
+    pageNav.style.display = 'flex';
+    setActiveChapter('ch-hero');
+    popInPanel(document.getElementById('ch-hero'));
+    splitReveal(document.getElementById('ch-hero'));
+    tryPlayMusic();
+    ScrollTrigger.refresh();
+  });
+  document.getElementById('noBtn').addEventListener('click', () => {
+    document.getElementById('gate-yes-page').classList.remove('active');
+    document.getElementById('gate-no-page').classList.add('active');
+  });
+  document.getElementById('backBtn').addEventListener('click', () => {
+    document.getElementById('gate-no-page').classList.remove('active');
+    document.getElementById('gate-yes-page').classList.add('active');
+  });
+
+  /* ---------- SURPRISE ---------- */
+  let surpriseTriggered = false;
+  function burstConfetti() {
+    const canvas = document.getElementById('confettiCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = innerWidth; canvas.height = innerHeight;
+    const colors = ['#D4AF7A', '#E3A9AE', '#9C2E42', '#F6E9D3', '#7A2439'];
+    const pieces = [];
+    for (let i = 0; i < 140; i++) pieces.push({ x: canvas.width / 2, y: canvas.height * 0.4, vx: (Math.random() - 0.5) * 14, vy: -Math.random() * 14 - 4, size: 4 + Math.random() * 5, color: colors[Math.floor(Math.random() * colors.length)], rot: Math.random() * 360, vrot: (Math.random() - 0.5) * 12, life: 0 });
+    (function tick() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      let alive = false;
+      pieces.forEach((p) => {
+        p.vy += 0.35; p.x += p.vx; p.y += p.vy; p.rot += p.vrot; p.life++;
+        if (p.life < 140) alive = true;
+        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot * Math.PI / 180);
+        ctx.fillStyle = p.color; ctx.globalAlpha = Math.max(0, 1 - p.life / 140);
+        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+        ctx.restore();
+      });
+      if (alive) requestAnimationFrame(tick); else ctx.clearRect(0, 0, canvas.width, canvas.height);
+    })();
+  }
+  function triggerSurprise() {
+    if (surpriseTriggered) return;
+    surpriseTriggered = true;
+    const target = Math.max(0, Math.floor((Date.now() - new Date(RELATIONSHIP_START).getTime()) / 86400000));
+    const el = document.getElementById('daysTogether');
+    const counter = { val: 0 };
+    gsap.to(counter, { val: target, duration: 1.8, ease: 'power2.out', onUpdate: () => { el.textContent = Math.floor(counter.val).toLocaleString(); } });
+    burstConfetti();
+  }
+
+  let statsTriggered = false;
+  function triggerStats() {
+    if (statsTriggered) return;
+    statsTriggered = true;
+    const counter = { val: 0 };
+    gsap.to(counter, { val: 1000, duration: 1.6, ease: 'power2.out', onUpdate: () => { document.getElementById('statChai').textContent = Math.floor(counter.val).toLocaleString() + '+'; } });
+  }
+
+  /* ---------- MUSIC ---------- */
+  const musicBtn = document.getElementById('musicBtn');
+  const bgMusic = document.getElementById('bgMusic');
+  bgMusic.addEventListener('loadedmetadata', () => { musicBtn.style.display = 'flex'; }, { once: true });
+  bgMusic.addEventListener('error', () => { musicBtn.style.display = 'none'; });
+  bgMusic.load();
+  function tryPlayMusic() {
+    if (musicBtn.style.display === 'none') return;
+    bgMusic.volume = 0;
+    bgMusic.play().then(() => { gsap.to(bgMusic, { volume: 0.55, duration: 1.8 }); musicBtn.classList.add('playing'); }).catch(() => {});
+  }
+  musicBtn.addEventListener('click', () => { if (bgMusic.paused) tryPlayMusic(); else { bgMusic.pause(); musicBtn.classList.remove('playing'); } });
+
+  /* ---------- VIDEO ---------- */
+  const memoryVideo = document.getElementById('memoryVideo');
+  const videoPlaceholder = document.getElementById('videoPlaceholder');
+  memoryVideo.addEventListener('loadedmetadata', () => { videoPlaceholder.style.display = 'none'; }, { once: true });
+  memoryVideo.addEventListener('error', () => { videoPlaceholder.style.display = 'flex'; });
+
+  /* ---------- LIGHTBOX ---------- */
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightboxImg');
+  let allMemoryPhotos = [];
+  function openLightbox(index) { lightbox._i = index; lightboxImg.src = allMemoryPhotos[index]; lightbox.classList.add('active'); lightbox.setAttribute('aria-hidden', 'false'); }
+  function closeLightbox() { lightbox.classList.remove('active'); lightbox.setAttribute('aria-hidden', 'true'); }
+  function stepLightbox(delta) { const n = allMemoryPhotos.length; lightbox._i = (lightbox._i + delta + n) % n; lightboxImg.src = allMemoryPhotos[lightbox._i]; }
+  document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
+  document.getElementById('lightboxNext').addEventListener('click', () => stepLightbox(1));
+  document.getElementById('lightboxPrev').addEventListener('click', () => stepLightbox(-1));
+  lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+  document.addEventListener('keydown', (e) => {
+    if (!lightbox.classList.contains('active')) return;
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowRight') stepLightbox(1);
+    if (e.key === 'ArrowLeft') stepLightbox(-1);
+  });
+
+  /* ---------- PHOTOS (auto-detects assets/photo-N.*) ---------- */
+  const ANIM_CYCLE = ['anim-pop', 'anim-left', 'anim-right', 'anim-blur', 'anim-rise', 'anim-tilt'];
+  function tryLoadPhoto(index) {
+    return new Promise((resolve) => {
+      let extIdx = 0;
+      const img = new Image();
+      function attempt() { if (extIdx >= PHOTO_EXTS.length) { resolve(null); return; } img.src = `assets/photo-${index}.${PHOTO_EXTS[extIdx]}`; }
+      img.onload = () => resolve(img.src);
+      img.onerror = () => { extIdx++; attempt(); };
+      attempt();
+    });
+  }
+
+  function fillChapterPhotos() {
+    const slots = document.querySelectorAll('.chapter-photo');
+    if (allMemoryPhotos.length === 0) { slots.forEach((s) => { s.style.display = 'none'; }); return; }
+    slots.forEach((slot) => {
+      const idx = parseInt(slot.dataset.photoIndex || '0', 10) % allMemoryPhotos.length;
+      const img = document.createElement('img');
+      img.src = allMemoryPhotos[idx]; img.alt = 'A favorite memory together'; img.loading = 'lazy';
+      slot.appendChild(img);
+    });
+  }
+
+  async function initGallery() {
+    const checks = [];
+    for (let i = 1; i <= MAX_PHOTOS; i++) checks.push(tryLoadPhoto(i));
+    allMemoryPhotos = (await Promise.all(checks)).filter(Boolean);
+
+    const curatedGallery = document.getElementById('curatedGallery');
+    const emptyNote = document.getElementById('galleryEmptyNote');
+    const memoriesGrid = document.getElementById('memoriesGrid');
+
+    if (allMemoryPhotos.length === 0) {
+      emptyNote.style.display = 'block';
+      memoriesGrid.innerHTML = '<p class="gallery-empty-note" style="display:block;grid-column:1/-1;">your photos will appear here once you add them</p>';
+      fillChapterPhotos();
+      return;
+    }
+
+
+    const rotations = [-4, 3, -2, 4, -3, 2];
+    const curated = allMemoryPhotos.slice(0, 6);
+    const rest = allMemoryPhotos.slice(6);
+
+    curated.forEach((src, i) => {
+      const fig = document.createElement('figure');
+      fig.className = 'polaroid pop-target ' + ANIM_CYCLE[i % ANIM_CYCLE.length];
+      fig.style.setProperty('--rot', rotations[i % rotations.length] + 'deg');
+      fig.setAttribute('role', 'button'); fig.setAttribute('tabindex', '0'); fig.setAttribute('aria-label', 'View photo larger');
+      fig.innerHTML = `<div class="photo-window"><img src="${src}" alt="A favorite memory together" loading="lazy"></div>`;
+      fig.addEventListener('click', () => openLightbox(i));
+      fig.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLightbox(i); } });
+      curatedGallery.appendChild(fig);
+    });
+
+    if (rest.length > 0) {
+      rest.forEach((src, j) => {
+        const div = document.createElement('div');
+        div.className = 'memory-thumb pop-target ' + ANIM_CYCLE[j % ANIM_CYCLE.length];
+        div.setAttribute('role', 'button'); div.setAttribute('tabindex', '0'); div.setAttribute('aria-label', 'View photo larger');
+        div.innerHTML = `<img src="${src}" alt="A favorite memory together" loading="lazy">`;
+        div.addEventListener('click', () => openLightbox(6 + j));
+        div.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLightbox(6 + j); } });
+        memoriesGrid.appendChild(div);
+      });
+    } else {
+      memoriesGrid.innerHTML = '<p class="gallery-empty-note" style="display:block;grid-column:1/-1;">these are all my favorites for now &mdash; more memories coming soon</p>';
+    }
+
+    fillChapterPhotos();
+    popInPanel(document.getElementById('ch-gallery'));
+    popInPanel(document.getElementById('ch-album'));
+  }
+
+  function renderNicknames() {
+    const cloud = document.getElementById('nicknameCloud');
+    NICKNAMES.forEach((name) => {
+      const tag = document.createElement('span');
+      tag.className = 'nickname-tag pop-target anim-pop';
+      tag.textContent = name;
+      tag.addEventListener('click', (e) => sparkleAt(e.clientX, e.clientY));
+      cloud.appendChild(tag);
+    });
+  }
+
+  renderNicknames();
+  initGallery();
+</script>
+</body>
+</html>
